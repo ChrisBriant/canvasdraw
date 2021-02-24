@@ -7,7 +7,7 @@
   export let height = 200;
 
 	let canvas;
-  let m = { x: 0, y: 0 };
+  let m = { x: 0, y: 0, pos:'' };
   let draw = false;
 	let mode = 'draw';
 
@@ -22,23 +22,41 @@
 
 	});
 
-	const reDraw = (ctx) => {
+	const reDraw = () => {
 		console.log('Redrawing');
+		const ctx = canvas.getContext('2d');
 		ctx.clearRect(0, 0, width, height);
 		ctx.moveTo($picStoreActions[0].x,$picStoreActions[0].y);
 		for(let i=0;i<$picStoreActions.length;i++) {
-			ctx.lineTo($picStoreActions[i].x,$picStoreActions[i].y);
+			if($picStoreActions[i].pos === 's') {
+				ctx.beginPath();
+				ctx.moveTo($picStoreActions[i].x,$picStoreActions[i]);
+			} else if ($picStoreActions[i].pos === 'e') {
+				ctx.closePath();
+			} else {
+				ctx.lineTo($picStoreActions[i].x,$picStoreActions[i].y);
+				ctx.stroke();
+			}
 		}
-		ctx.stroke();
+	}
+
+	const wipeBoard = () => {
+		console.log('Super retarted');
+		const ctx = canvas.getContext('2d');
+		ctx.clearRect(0, 0, width, height);
 	}
 
   const handleClick = (e) => {
     let ctx = e.target.getContext('2d');
+		//ctx.beginPath();
     m.x = e.clientX - e.target.offsetLeft;
     m.y = e.clientY - e.target.offsetTop;
+		m.pos = 's';
     console.log('Click');
     draw = true;
+		ctx.beginPath();
     ctx.moveTo(m.x,m.y);
+		picStoreActions.draw(m);
   }
 
   const handleDrag = (e) => {
@@ -46,6 +64,7 @@
     let ctx = e.target.getContext('2d');
 		m.x = e.clientX - e.target.offsetLeft;
 		m.y = e.clientY - e.target.offsetTop;
+		m.pos = '';
     if(draw && mode === 'draw') {
       ctx.lineTo(m.x,m.y);
       ctx.stroke();
@@ -53,11 +72,17 @@
       picStoreActions.draw(m);
     } else if (draw && mode === 'erase') {
 			picStoreActions.erase(m);
-			reDraw(ctx);
+			//reDraw(ctx);
     }
   }
 
-  const handleUnClick = () => {
+  const handleUnClick = (e) => {
+		let ctx = e.target.getContext('2d');
+		m.x = e.clientX - e.target.offsetLeft;
+		m.y = e.clientY - e.target.offsetTop;
+		m.pos = 'e';
+		ctx.closePath();
+		picStoreActions.draw(m);
     draw = false;
     console.log('Un Click');
   }
@@ -78,7 +103,7 @@
   bind:this={canvas}
   on:mousemove={(e) => handleDrag(e)}
   on:mousedown={(e) => handleClick(e)}
-  on:mouseup={() => handleUnClick()}
+  on:mouseup={(e) => handleUnClick(e)}
 	width={width}
 	height={height}
 >
@@ -87,6 +112,8 @@
 <Toolbox
 	on:draw={() => {mode = 'draw'}}
 	on:erase={() => {mode = 'erase'}}
+	on:wipeboard={wipeBoard}
+	on:redraw={reDraw}
  />
 	<p>The mouse position is {m.x} x {m.y}</p>
 </div>

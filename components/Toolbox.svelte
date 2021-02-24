@@ -1,7 +1,7 @@
 <script>
   import {createEventDispatcher} from 'svelte';
   import Icon from 'svelte-awesome';
-  import { eraser, pencil } from 'svelte-awesome/icons';
+  import { eraser, pencil,beer,comment } from 'svelte-awesome/icons';
 
   const dispatch = createEventDispatcher();
 </script>
@@ -27,6 +27,20 @@
   >
       <Icon
         data={eraser}
+        />
+  </div>
+  <div
+    on:click={() => {dispatch('wipeboard')}}
+  >
+      <Icon
+        data={beer}
+        />
+  </div>
+  <div
+    on:click={() => {dispatch('redraw')}}
+  >
+      <Icon
+        data={comment}
         />
   </div>
 </div>
